@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Нуртас + Аяулым</title>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg,#ff7eb9,#ff65a3,#7afcff);
+  background-size:400% 400%;
+  animation:bgShift 30s ease infinite;
+  font-family:"Segoe UI",Arial,sans-serif;
+  cursor:default;
+  position:relative;
+  transition:background 0.3s;
+}
+@keyframes bgShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+h1{
+  font-size:4em;
+  color:white;
+  text-shadow:0 0 20px rgba(255,255,255,0.8),0 0 40px rgba(255,182,193,0.6);
+  cursor:pointer;
+  z-index:10;
+  white-space:pre;
+  overflow:hidden;
+  border-right:.15em solid white;
+  animation:pulseText 2s infinite,glowText 3s infinite alternate;
+  position:relative;
+  transition: transform 0.1s, color 0.5s, text-shadow 0.5s;
+}
+@keyframes pulseText{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+}
+@keyframes glowText{
+  0%{text-shadow:0 0 20px rgba(255,255,255,0.8),0 0 40px rgba(255,182,193,0.6)}
+  100%{text-shadow:0 0 50px rgba(255,255,255,1),0 0 70px rgba(255,182,193,0.9)}
+}
+.particle{
+  position:absolute;
+  pointer-events:none;
+  user-select:none;
+  font-size:1em;
+  animation:floatParticle linear forwards,shimmer 2s infinite alternate;
+}
+@keyframes floatParticle{
+  0%{transform:translate(0,0) rotate(0deg);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) rotate(360deg);opacity:0}
+}
+@keyframes shimmer{
+  0%{opacity:0.6}
+  50%{opacity:1}
+  100%{opacity:0.6}
+}
+.cursorTrail{
+  position:absolute;
+  font-size:1em;
+  pointer-events:none;
+  user-select:none;
+  animation:floatParticle 2s linear forwards,shimmer 2s infinite alternate;
+}
+</style>
+</head>
+<body>
+
+<h1 id="loveText"></h1>
+
+<audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" autoplay loop></audio>
+<audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+
+<script>
+const text="💖 Дастан + Аружан 💖";
+const loveText=document.getElementById('loveText');
+const clickSound=document.getElementById('clickSound');
+const emojis=['💖','💕','💘','💝','❤️','💞','✨','💫','⭐'];
+let index=0;
+let mouseX=window.innerWidth/2;
+let mouseY=window.innerHeight/2;
+
+// Печатаем текст
+function typeWriter(){
+  if(index<text.length){
+    loveText.innerHTML+=text.charAt(index);
+    spawnParticles(loveText,5);
+    spawnOrbitEmojis();
+    index++;
+    setTimeout(typeWriter,120);
+  }else{
+    loveText.style.borderRight='none';
+  }
+}
+typeWriter();
+
+// Текст сияет и меняет цвет
+setInterval(()=>{
+  const r=Math.floor(200+Math.random()*55);
+  const g=Math.floor(100+Math.random()*155);
+  const b=Math.floor(200+Math.random()*55);
+  loveText.style.color=`rgb(${r},${g},${b})`;
+  loveText.style.textShadow=`0 0 30px rgba(${r},${g},${b},0.8),0 0 60px rgba(${r},${g},${b},0.5)`;
+},1000);
+
+// Частицы с орбитальной спиралью
+function spawnParticles(element,count=6){
+  const rect=element.getBoundingClientRect();
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=rect.left+rect.width/2+'px';
+    p.style.top=rect.top+rect.height/2+'px';
+    p.style.fontSize=(12+Math.random()*18)+'px';
+    p.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+    // орбитальная спираль с разной скоростью
+    const angle=Math.random()*2*Math.PI;
+    const radius=Math.random()*100+50;
+    const speed=0.5+Math.random()*1.5;
+    const dx=radius*Math.cos(angle)*speed + (rect.left+rect.width/2-mouseX)/25;
+    const dy=radius*Math.sin(angle)*speed + (rect.top+rect.height/2-mouseY)/25;
+    p.style.setProperty('--dx',dx+'px');
+    p.style.setProperty('--dy',dy+'px');
+    p.style.animationDuration=(2+Math.random()*2)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),5000);
+  }
+}
+
+// Орбитальные эмодзи
+function spawnOrbitEmojis(){
+  const rect=loveText.getBoundingClientRect();
+  const orb=document.createElement('div');
+  orb.className='particle';
+  orb.style.left=rect.left+rect.width/2+'px';
+  orb.style.top=rect.top+rect.height/2+'px';
+  orb.style.fontSize=(14+Math.random()*14)+'px';
+  orb.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+  const angle=Math.random()*2*Math.PI;
+  const radius=80+Math.random()*100;
+  orb.style.setProperty('--dx',radius*Math.cos(angle)+'px');
+  orb.style.setProperty('--dy',radius*Math.sin(angle)+'px');
+  orb.style.animationDuration=(2+Math.random()*2)+'s';
+  document.body.appendChild(orb);
+  setTimeout(()=>orb.remove(),4000);
+}
+
+// Вихревой мини-фейерверк
+function spawnSpiralFirework(){
+  const x=Math.random()*window.innerWidth;
+  const y=Math.random()*window.innerHeight/2+window.innerHeight/4;
+  for(let i=0;i<25;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=x+'px';
+    p.style.top=y+'px';
+    p.style.fontSize=(10+Math.random()*15)+'px';
+    p.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+    const angle=Math.random()*2*Math.PI;
+    const radius=50+Math.random()*120;
+    const speed=0.5+Math.random();
+    const dx=radius*Math.cos(angle)*speed + (mouseX-x)/20;
+    const dy=radius*Math.sin(angle)*speed + (mouseY-y)/20;
+    p.style.setProperty('--dx',dx+'px');
+    p.style.setProperty('--dy',dy+'px');
+    p.style.animationDuration=(2+Math.random()*2)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),5000);
+  }
+}
+
+// Постоянные эффекты
+setInterval(()=>spawnParticles(loveText,5),400);
+setInterval(spawnOrbitEmojis,600);
+setInterval(spawnSpiralFirework,2500);
+
+// Клик по тексту — вихревой взрыв
+loveText.addEventListener('click',()=>{
+  clickSound.currentTime=0;
+  clickSound.play();
+  spawnParticles(loveText,30);
+  spawnOrbitEmojis();
+  for(let i=0;i<35;i++) spawnSpiralFirework();
+});
+
+// След курсора с притяжением к тексту
+document.addEventListener('mousemove',e=>{
+  mouseX=e.clientX;
+  mouseY=e.clientY;
+  for(let i=0;i<4;i++){
+    const trail=document.createElement('div');
+    trail.className='cursorTrail';
+    trail.style.left=e.clientX+'px';
+    trail.style.top=e.clientY+'px';
+    trail.style.fontSize=(10+Math.random()*18)+'px';
+    trail.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+    const dx=(Math.random()-0.5)*150 + (loveText.offsetLeft+loveText.offsetWidth/2-e.clientX)/30;
+    const dy=(Math.random()-0.5)*150 + (loveText.offsetTop+loveText.offsetHeight/2-e.clientY)/30;
+    trail.style.setProperty('--dx',dx+'px');
+    trail.style.setProperty('--dy',dy+'px');
+    trail.style.animationDuration=(1+Math.random()*2)+'s';
+    document.body.appendChild(trail);
+    setTimeout(()=>trail.remove(),3000);
+  }
+  
+  // Текст колышется к курсору
+  const rect=loveText.getBoundingClientRect();
+  const offsetX=(e.clientX-(rect.left+rect.width/2))/12;
+  const offsetY=(e.clientY-(rect.top+rect.height/2))/12;
+  loveText.style.transform=`translate(${offsetX}px,${offsetY}px) scale(1.2)`;
+  
+  // Фон изменяет угол градиента
+  const angle=135+(e.clientX/window.innerWidth-0.5)*150;
+  const bg1= `linear-gradient(${angle}deg,#ff7eb9,#ff65a3,#7afcff)`;
+  document.body.style.background=bg1;
+});
+
+// Возврат текста в центр при уходе мыши
+document.addEventListener('mouseleave',()=>{
+  loveText.style.transform='translate(0px,0px) scale(1.15)';
+});
+</script>
+
+</body>
+</html>
